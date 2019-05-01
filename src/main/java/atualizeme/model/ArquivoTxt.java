@@ -8,14 +8,16 @@ public class ArquivoTxt {
 	private String caminhoLiteral;
 	private String hashFile;
 	private File file;
+	private String nome;
 
-	public ArquivoTxt(String caminhoPasta, String caminhoLiteral, String hashFile, File file) {
+	public ArquivoTxt(String caminhoPasta, String caminhoLiteral, String hashFile, File file, String nome) {
 		this.caminhoPasta = caminhoPasta;
 		this.caminhoLiteral = caminhoLiteral;
 		this.hashFile = hashFile;
 		this.file = file;
+		this.nome = nome;
 	}
-
+	
 	public String getCaminhoPasta() {
 		return caminhoPasta;
 	}
@@ -46,6 +48,14 @@ public class ArquivoTxt {
 
 	public void setFile(File file) {
 		this.file = file;
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
 	@Override
