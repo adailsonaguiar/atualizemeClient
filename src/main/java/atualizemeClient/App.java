@@ -52,7 +52,7 @@ public class App {
 	public static void baixarTodos(List<Arquivo> arquivosServidor) {
 		try {
 			for (int i = 0; i < arquivosServidor.size(); i++) {
-				baixarArquivo(arquivosServidor.get(i).getCaminhoPasta());
+				baixarArquivo(arquivosServidor.get(i).getCaminhoPasta(), arquivosServidor.get(i).getNome());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -103,12 +103,12 @@ public class App {
 		return arquivoServidor;
 	}
 
-	public static void baixarArquivo(String caminhoPastaArquivo) throws IOException {
+	public static void baixarArquivo(String caminhoPastaArquivo, String nome) throws IOException {
 		Client client = ClientBuilder.newClient();
 		String encodedString = Base64.getEncoder().encodeToString(caminhoPastaArquivo.getBytes());
 		Response response = client.target(URL_DOWNLOAD).path(encodedString).request().get();
 
-		String location = CAMINHO + caminhoPastaArquivo;
+		String location = CAMINHO + caminhoPastaArquivo + "_temp_" + nome;
 		criarPastaPai(location);
 		FileOutputStream out = new FileOutputStream(location);
 		InputStream is = (InputStream) response.getEntity();
@@ -138,7 +138,7 @@ public class App {
 		List<Arquivo> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
 		for (int i = 0; i < arquivosAdd.size(); i++) {
 			try {
-				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta());
+				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta(), arquivosAdd.get(i).getNome());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -165,7 +165,7 @@ public class App {
 			for (int i = 0; i < arquivosDownload.size(); i++) {
 				System.out.println("Atualizando Arquivos");
 
-				baixarArquivo(arquivosDownload.get(i).getCaminhoPasta());
+				baixarArquivo(arquivosDownload.get(i).getCaminhoPasta(), arquivosDownload.get(i).getNome());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

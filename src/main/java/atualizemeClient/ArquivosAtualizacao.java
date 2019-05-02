@@ -1,6 +1,7 @@
 package atualizemeClient;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +13,10 @@ import atualizemeClient.model.Arquivo;
 public class ArquivosAtualizacao {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-
+		String CAMINHO = System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "aaa"
+				+ File.separator + "InstaladorSicapAnalisador2017.jar";
+		File f = new File(CAMINHO);
+		System.out.println(f.getName());
 	}
 
 	public List<Arquivo> readFile(String pathFile) throws IOException {
@@ -46,7 +50,8 @@ public class ArquivosAtualizacao {
 		List<Arquivo> arqAdicionar = new ArrayList<Arquivo>();
 		for (int i = 0; i < listaServidor.size(); i++) {
 			if (!listacliente.contains(listaServidor.get(i))) {
-				arqAdicionar.add(new Arquivo(listaServidor.get(i).getCaminhoPasta(), "", "", null, ""));
+				arqAdicionar.add(new Arquivo(listaServidor.get(i).getCaminhoPasta(), "", "", null,
+						listaServidor.get(i).getNome()));
 			}
 		}
 		return arqAdicionar;
