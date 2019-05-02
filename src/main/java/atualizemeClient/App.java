@@ -130,7 +130,7 @@ public class App {
 			return true;
 		}
 		File newFolder = new File(pathParent);
-		return newFolder.mkdir();
+		return newFolder.mkdirs();
 	}
 
 	public static void baixarArquivosNovos(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,

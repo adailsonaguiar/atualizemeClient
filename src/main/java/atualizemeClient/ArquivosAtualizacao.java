@@ -14,19 +14,6 @@ public class ArquivosAtualizacao {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
-//		List<ArquivoTxt> listaServidor = readFile(
-//				System.getProperty("user.home") + File.separator + "oias" + File.separator + "MD5.txt");
-//		List<ArquivoTxt> listacliente = readFile(
-//				System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "oias" + File.separator + "MD5.txt");
-//
-//		System.out.println(comparaListas(listaServidor, listacliente));
-
-		String location = "/home/adailson/Downloads/oias/drawable-xxhdpi/icon.png";
-
-		File f = new File(location);
-		System.out.println(f.getParentFile());
-// FileOutputStream out = new FileOutputStream(location);
-
 	}
 
 	public List<Arquivo> readFile(String pathFile) throws IOException {
