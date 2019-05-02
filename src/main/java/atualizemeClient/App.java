@@ -32,6 +32,7 @@ public class App {
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 		ArquivosAtualizacao md5 = new ArquivosAtualizacao();
 		arquivosServidor = verificarAtualizacao();
+
 		try {
 			arquivosLocal = md5.readFile(CAMINHO + "MD5.txt");
 
@@ -45,6 +46,7 @@ public class App {
 			baixarTodos(arquivosServidor);
 			baixarArquivoAtualizacao();
 		}
+
 	}
 
 	public static void baixarTodos(List<Arquivo> arquivosServidor) {
@@ -80,8 +82,8 @@ public class App {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 	public static List<Arquivo> verificarAtualizacao() {
@@ -98,7 +100,6 @@ public class App {
 		}.getType();
 
 		arquivoServidor = new Gson().fromJson(decodedString, listType);
-
 		return arquivoServidor;
 	}
 
@@ -117,7 +118,6 @@ public class App {
 		while ((len = is.read(buffer)) != -1) {
 			out.write(buffer, 0, len);
 		}
-
 		out.flush();
 		out.close();
 		is.close();

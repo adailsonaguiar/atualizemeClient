@@ -25,7 +25,6 @@ public class ArquivosAtualizacao {
 		while ((linha = buffer.readLine()) != null) {
 
 			String[] dados = linha.split(";");
-			// String caminhoPasta, String caminhoLiteral, String hashFile, File file
 			content.add(new Arquivo(dados[1].toString(), dados[0].toString(), dados[2].toString(), null,
 					dados[3].toString()));
 		}
