@@ -17,8 +17,7 @@ import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import atualizeme.model.ArquivoTxt;
-import atualizeme.test.ArquivoMD5;
+import atualizemeClient.model.Arquivo;
 
 public class App {
 
@@ -27,16 +26,14 @@ public class App {
 	public static String URL_DOWNLOAD = "http://localhost:8080/atualizeme/api/update/getarquivo";
 	public static String CAMINHO = System.getProperty("user.home") + File.separator + "Downloads" + File.separator
 			+ "oias" + File.separator;
-	public static List<ArquivoTxt> arquivosLocal;
-	public static List<ArquivoTxt> arquivosServidor;
+	public static List<Arquivo> arquivosLocal;
+	public static List<Arquivo> arquivosServidor;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-		ArquivoMD5 md5 = new ArquivoMD5();
-		md5.setNome("MD5.txt");
-		md5.setPastaAplicacao(CAMINHO);
+		ArquivosAtualizacao md5 = new ArquivosAtualizacao();
 		arquivosServidor = verificarAtualizacao();
 		try {
-			arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
+			arquivosLocal = md5.readFile(CAMINHO + "MD5.txt");
 
 			baixarArquivosAlteradosServidor(md5, arquivosServidor, arquivosLocal);
 
@@ -50,7 +47,7 @@ public class App {
 		}
 	}
 
-	public static void baixarTodos(List<ArquivoTxt> arquivosServidor) {
+	public static void baixarTodos(List<Arquivo> arquivosServidor) {
 		try {
 			for (int i = 0; i < arquivosServidor.size(); i++) {
 				baixarArquivo(arquivosServidor.get(i).getCaminhoPasta());
@@ -87,8 +84,8 @@ public class App {
 		return false;
 	}
 
-	public static List<ArquivoTxt> verificarAtualizacao() {
-		List<ArquivoTxt> arquivoServidor;
+	public static List<Arquivo> verificarAtualizacao() {
+		List<Arquivo> arquivoServidor;
 
 		Client client = ClientBuilder.newClient();
 		Response response = client.target(URL_VERIFICACAO).request().get();
@@ -97,7 +94,7 @@ public class App {
 
 		String decodedString = new String(decodedBytes);
 
-		Type listType = new TypeToken<ArrayList<ArquivoTxt>>() {
+		Type listType = new TypeToken<ArrayList<Arquivo>>() {
 		}.getType();
 
 		arquivoServidor = new Gson().fromJson(decodedString, listType);
@@ -136,9 +133,9 @@ public class App {
 		return newFolder.mkdir();
 	}
 
-	public static void baixarArquivosNovos(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
-			List<ArquivoTxt> arquivosLocal) {
-		List<ArquivoTxt> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
+	public static void baixarArquivosNovos(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
+			List<Arquivo> arquivosLocal) {
+		List<Arquivo> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
 		for (int i = 0; i < arquivosAdd.size(); i++) {
 			try {
 				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta());
@@ -150,9 +147,9 @@ public class App {
 		}
 	}
 
-	public static void excluirArquivosNaoContidosNoServidor(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
-			List<ArquivoTxt> arquivosLocal) {
-		List<ArquivoTxt> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocal);
+	public static void excluirArquivosNaoContidosNoServidor(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
+			List<Arquivo> arquivosLocal) {
+		List<Arquivo> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocal);
 
 		for (int i = 0; i < arquivosExlusao.size(); i++) {
 			if (!arquivosExlusao.get(i).getCaminhoPasta().equals("MD5.txt")) {
@@ -161,10 +158,10 @@ public class App {
 		}
 	}
 
-	public static void baixarArquivosAlteradosServidor(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
-			List<ArquivoTxt> arquivosLocal) {
+	public static void baixarArquivosAlteradosServidor(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
+			List<Arquivo> arquivosLocal) {
 		try {
-			List<ArquivoTxt> arquivosDownload = md5.comparaListas(arquivosServidor, arquivosLocal);
+			List<Arquivo> arquivosDownload = md5.comparaListas(arquivosServidor, arquivosLocal);
 			for (int i = 0; i < arquivosDownload.size(); i++) {
 				System.out.println("Atualizando Arquivos");
 
