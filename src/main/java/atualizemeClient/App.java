@@ -1,7 +1,6 @@
 package atualizemeClient;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,70 +31,12 @@ public class App {
 	public static List<ArquivoTxt> arquivosServidor;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-
-//		boolean end = false;
-//		while (!end) {
-//			ArquivoMD5 md5 = new ArquivoMD5();
-//			md5.setNome("MD5.txt");
-//			md5.setPastaAplicacao(caminho);
-//			md5.arquivomd5(md5.getPastaAplicacao(), md5.getNome());
-//
-//			List<ArquivoTxt> listacliente = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
-//
-//			String json = new Gson().toJson(listacliente);
-//			String encodedString = Base64.getEncoder().encodeToString(json.getBytes());
-//
-//			Client client = ClientBuilder.newClient();
-//			Response response = client.target("http://localhost:8080/atualizeme/api/update/get").path(encodedString)
-//					.request().get();
-//
-//			if (response.getStatus() == 200) {
-//				end = true;
-//				System.out.println("Tudo atualizado!");
-//			} else {
-//
-//				String location = System.getProperty("user.home") + File.separator + "Downloads" + File.separator
-//						+ "oias" + File.separator + response.getHeaderString("nomeArquivo");
-//				System.out.println(location);
-//
-//				if (response.getHeaderString("listaExclusao") != null) {
-//					byte[] decodedBytes = Base64.getDecoder().decode(response.getHeaderString("listaExclusao"));
-//					String decodedString = new String(decodedBytes);
-//					Type listType = new TypeToken<ArrayList<ArquivoTxt>>() {
-//					}.getType();
-//					List<ArquivoTxt> listaExclusao = new Gson().fromJson(decodedString, listType);
-//
-//					if (listaExclusao.size() > 0) {
-//						for (int i = 0; i < listaExclusao.size(); i++) {
-//							File f = new File(caminho + listaExclusao.get(i).getCaminhoPasta());
-//							f.delete();
-//						}
-//					}
-//				}
-//
-//				FileOutputStream out = new FileOutputStream(location);
-//				InputStream is = (InputStream) response.getEntity();
-//
-//				int len = 0;
-//				byte[] buffer = new byte[4096];
-//				while ((len = is.read(buffer)) != -1) {
-//					out.write(buffer, 0, len);
-//				}
-//
-//				out.flush();
-//				out.close();
-//				is.close();
-//			}
-//		}
-
 		ArquivoMD5 md5 = new ArquivoMD5();
 		md5.setNome("MD5.txt");
 		md5.setPastaAplicacao(CAMINHO);
-
+		arquivosServidor = verificarAtualizacao();
 		try {
 			arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
-			arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
-			arquivosServidor = verificarAtualizacao();
 
 			baixarArquivosAlteradosServidor(md5, arquivosServidor, arquivosLocal);
 
@@ -104,7 +45,19 @@ public class App {
 			baixarArquivosNovos(md5, arquivosServidor, arquivosLocal);
 			baixarArquivoAtualizacao();
 		} catch (IOException e) {
-			baixarTodos(md5);
+			baixarTodos(arquivosServidor);
+			baixarArquivoAtualizacao();
+		}
+	}
+
+	public static void baixarTodos(List<ArquivoTxt> arquivosServidor) {
+		try {
+			for (int i = 0; i < arquivosServidor.size(); i++) {
+				baixarArquivo(arquivosServidor.get(i).getCaminhoPasta());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -134,20 +87,6 @@ public class App {
 		return false;
 	}
 
-	public static void baixarTodos(ArquivoMD5 md5) {
-		if (baixarArquivoAtualizacao()) {
-			try {
-				arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
-				for (int i = 0; i < arquivosLocal.size(); i++) {
-					baixarArquivo(arquivosLocal.get(i).getCaminhoPasta());
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
 	public static List<ArquivoTxt> verificarAtualizacao() {
 		List<ArquivoTxt> arquivoServidor;
 
@@ -172,7 +111,7 @@ public class App {
 		Response response = client.target(URL_DOWNLOAD).path(encodedString).request().get();
 
 		String location = CAMINHO + caminhoPastaArquivo;
-		parentPath(location);
+		criarPastaPai(location);
 		FileOutputStream out = new FileOutputStream(location);
 		InputStream is = (InputStream) response.getEntity();
 
@@ -187,7 +126,7 @@ public class App {
 		is.close();
 	}
 
-	public static boolean parentPath(String caminhoArquivo) {
+	public static boolean criarPastaPai(String caminhoArquivo) {
 		File f = new File(caminhoArquivo);
 		String pathParent = f.getParent() + File.separator;
 		if (pathParent.equals(CAMINHO)) {
@@ -213,7 +152,6 @@ public class App {
 
 	public static void excluirArquivosNaoContidosNoServidor(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
 			List<ArquivoTxt> arquivosLocal) {
-		File f = new File(CAMINHO);
 		List<ArquivoTxt> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocal);
 
 		for (int i = 0; i < arquivosExlusao.size(); i++) {
