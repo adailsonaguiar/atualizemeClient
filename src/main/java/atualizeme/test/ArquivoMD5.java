@@ -139,7 +139,7 @@ public class ArquivoMD5 {
 
 	public List<ArquivoTxt> adiconarArquivos(List<ArquivoTxt> listaServidor, List<ArquivoTxt> listacliente) {
 		List<ArquivoTxt> arqAdicionar = new ArrayList<ArquivoTxt>();
-		for (int i = 0; i < listacliente.size(); i++) {
+		for (int i = 0; i < listaServidor.size(); i++) {
 			if (!listacliente.contains(listaServidor.get(i))) {
 				arqAdicionar.add(new ArquivoTxt(listaServidor.get(i).getCaminhoPasta(), "", "", null, ""));
 			}
@@ -150,11 +150,11 @@ public class ArquivoMD5 {
 	public List<ArquivoTxt> comparaListas(List<ArquivoTxt> listaServidor, List<ArquivoTxt> listacliente) {
 		List<ArquivoTxt> arqEnvio = new ArrayList<ArquivoTxt>();
 		for (int i = 0; i < listacliente.size(); i++) {
-			if (listacliente.contains(listaServidor.get(i))) {
-				for (int j = 0; j < listacliente.size(); j++) {
-					if (listacliente.get(j).getCaminhoPasta().equals(listaServidor.get(i).getCaminhoPasta())) {
-						if (!listacliente.get(j).getHashFile().equals(listaServidor.get(i).getHashFile())) {
-							arqEnvio.add(listacliente.get(j));
+			if (listaServidor.contains(listacliente.get(i))) {
+				for (int j = 0; j < listaServidor.size(); j++) {
+					if (listaServidor.get(j).getCaminhoPasta().equals(listacliente.get(i).getCaminhoPasta())) {
+						if (!listaServidor.get(j).getHashFile().equals(listacliente.get(i).getHashFile())) {
+							arqEnvio.add(listaServidor.get(j));
 						}
 					}
 				}

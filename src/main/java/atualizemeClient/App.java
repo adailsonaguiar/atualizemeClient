@@ -29,6 +29,7 @@ public class App {
 	public static String CAMINHO = System.getProperty("user.home") + File.separator + "Downloads" + File.separator
 			+ "oias" + File.separator;
 	public static List<ArquivoTxt> arquivosLocal;
+	public static List<ArquivoTxt> arquivosServidor;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
@@ -93,37 +94,17 @@ public class App {
 
 		try {
 			arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
+			arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
+			arquivosServidor = verificarAtualizacao();
 
-			System.out.println("Verificando Atualiza��es");
-			List<ArquivoTxt> arquivosServidor = verificarAtualizacao();
-			List<ArquivoTxt> arquivosDownload = md5.comparaListas(arquivosServidor, arquivosLocal);
-			for (int i = 0; i < arquivosDownload.size(); i++) {
-				System.out.println("Atualizando Arquivos");
-				baixarArquivo(arquivosDownload.get(i).getCaminhoPasta());
-			}
+			baixarArquivosAlteradosServidor(md5, arquivosServidor, arquivosLocal);
 
-			// Deletando arquivos
-			File f = new File(CAMINHO);
-			List<ArquivoTxt> arquivosLocalMemoria = md5.listaCaminhos(f);
-			List<ArquivoTxt> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocalMemoria);
-			System.out.println(arquivosExlusao.get(0).getNome());
-			for (int i = 0; i < arquivosExlusao.size(); i++) {
-				// if (!arquivosExlusao.get(i).getCaminhoPasta().equals("MD5.txt")) {
-				// deletarArquivo(arquivosExlusao.get(i).getCaminhoPasta());
-				// }
-			}
+			excluirArquivosNaoContidosNoServidor(md5, arquivosServidor, arquivosLocal);
 
-			List<ArquivoTxt> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
-			for (int i = 0; i < arquivosAdd.size(); i++) {
-				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta());
-			}
+			baixarArquivosNovos(md5, arquivosServidor, arquivosLocal);
+			baixarArquivoAtualizacao();
 		} catch (IOException e) {
-			if (baixarArquivoAtualizacao()) {
-				arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
-				for (int i = 0; i < arquivosLocal.size(); i++) {
-					baixarArquivo(arquivosLocal.get(i).getCaminhoPasta());
-				}
-			}
+			baixarTodos(md5);
 		}
 	}
 
@@ -151,6 +132,20 @@ public class App {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static void baixarTodos(ArquivoMD5 md5) {
+		if (baixarArquivoAtualizacao()) {
+			try {
+				arquivosLocal = md5.readFile(md5.getPastaAplicacao() + md5.getNome());
+				for (int i = 0; i < arquivosLocal.size(); i++) {
+					baixarArquivo(arquivosLocal.get(i).getCaminhoPasta());
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static List<ArquivoTxt> verificarAtualizacao() {
@@ -200,6 +195,47 @@ public class App {
 		}
 		File newFolder = new File(pathParent);
 		return newFolder.mkdir();
+	}
+
+	public static void baixarArquivosNovos(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
+			List<ArquivoTxt> arquivosLocal) {
+		List<ArquivoTxt> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
+		for (int i = 0; i < arquivosAdd.size(); i++) {
+			try {
+				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println(arquivosAdd.get(i).getCaminhoPasta());
+		}
+	}
+
+	public static void excluirArquivosNaoContidosNoServidor(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
+			List<ArquivoTxt> arquivosLocal) {
+		File f = new File(CAMINHO);
+		List<ArquivoTxt> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocal);
+
+		for (int i = 0; i < arquivosExlusao.size(); i++) {
+			if (!arquivosExlusao.get(i).getCaminhoPasta().equals("MD5.txt")) {
+				deletarArquivo(arquivosExlusao.get(i).getCaminhoPasta());
+			}
+		}
+	}
+
+	public static void baixarArquivosAlteradosServidor(ArquivoMD5 md5, List<ArquivoTxt> arquivosServidor,
+			List<ArquivoTxt> arquivosLocal) {
+		try {
+			List<ArquivoTxt> arquivosDownload = md5.comparaListas(arquivosServidor, arquivosLocal);
+			for (int i = 0; i < arquivosDownload.size(); i++) {
+				System.out.println("Atualizando Arquivos");
+
+				baixarArquivo(arquivosDownload.get(i).getCaminhoPasta());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void deletarArquivo(String caminhoPastaArquivo) {
