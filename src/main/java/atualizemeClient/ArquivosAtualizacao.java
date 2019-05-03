@@ -59,7 +59,9 @@ public class ArquivosAtualizacao {
 		for (int i = 0; i < listacliente.size(); i++) {
 			if (listaServidor.contains(listacliente.get(i))) {
 				for (int j = 0; j < listaServidor.size(); j++) {
-					if (listaServidor.get(j).getCaminhoPasta().equals(listacliente.get(i).getCaminhoPasta())) {
+					String arquivoServidor = listaServidor.get(j).getCaminhoPasta() + listaServidor.get(j).getNome();
+					String arquivoCliente = listacliente.get(i).getCaminhoPasta() + listacliente.get(i).getNome();
+					if (arquivoServidor.equals(arquivoCliente)) {
 						if (!listaServidor.get(j).getHashFile().equals(listacliente.get(i).getHashFile())) {
 							arqEnvio.add(listaServidor.get(j));
 						}
