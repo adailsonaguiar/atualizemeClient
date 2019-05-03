@@ -30,29 +30,34 @@ public class App {
 	public static List<Arquivo> arquivosServidor;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-		ArquivosAtualizacao md5 = new ArquivosAtualizacao();
+		ArquivosAtualizacao arquivosAtualizacao = new ArquivosAtualizacao();
 		arquivosServidor = verificarAtualizacao();
 
 		try {
-			arquivosLocal = md5.readFile(CAMINHO + "MD5.txt");
+			arquivosLocal = arquivosAtualizacao.readFile(CAMINHO + "MD5.txt");
 
-			baixarArquivosAlteradosServidor(md5, arquivosServidor, arquivosLocal);
+			baixarArquivosAlteradosServidor(arquivosAtualizacao, arquivosServidor, arquivosLocal);
 
-			excluirArquivosNaoContidosNoServidor(md5, arquivosServidor, arquivosLocal);
+			excluirArquivosNaoContidosNoServidor(arquivosAtualizacao, arquivosServidor, arquivosLocal);
 
-			baixarArquivosNovos(md5, arquivosServidor, arquivosLocal);
+			baixarArquivosNovos(arquivosAtualizacao, arquivosServidor, arquivosLocal);
 			baixarArquivoAtualizacao();
+
+			renomearArquivosTemp(arquivosAtualizacao);
+
 		} catch (IOException e) {
-			baixarTodos(arquivosServidor);
+			baixarTodos(arquivosAtualizacao, arquivosServidor);
 			baixarArquivoAtualizacao();
+			renomearArquivosTemp(arquivosAtualizacao);
 		}
 
 	}
 
-	public static void baixarTodos(List<Arquivo> arquivosServidor) {
+	public static void baixarTodos(ArquivosAtualizacao arquivosAtualizacao, List<Arquivo> arquivosServidor) {
 		try {
 			for (int i = 0; i < arquivosServidor.size(); i++) {
-				baixarArquivo(arquivosServidor.get(i).getCaminhoPasta(), arquivosServidor.get(i).getNome());
+				baixarArquivo(arquivosAtualizacao, arquivosServidor.get(i).getCaminhoPasta(),
+						arquivosServidor.get(i).getNome());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -103,10 +108,12 @@ public class App {
 		return arquivoServidor;
 	}
 
-	public static void baixarArquivo(String caminhoPastaArquivo, String nome) throws IOException {
+	public static void baixarArquivo(ArquivosAtualizacao atualizacao, String caminhoPastaArquivo, String nome)
+			throws IOException {
 		Client client = ClientBuilder.newClient();
-		String encodedString = Base64.getEncoder().encodeToString(caminhoPastaArquivo.getBytes());
-		Response response = client.target(URL_DOWNLOAD).path(encodedString).request().get();
+		String caminhoEncode = Base64.getEncoder().encodeToString(caminhoPastaArquivo.getBytes());
+		String nomeEncode = Base64.getEncoder().encodeToString(nome.getBytes());
+		Response response = client.target(URL_DOWNLOAD).path(caminhoEncode).path(nomeEncode).request().get();
 
 		String location = CAMINHO + caminhoPastaArquivo + "_temp_" + nome;
 		criarPastaPai(location);
@@ -118,6 +125,8 @@ public class App {
 		while ((len = is.read(buffer)) != -1) {
 			out.write(buffer, 0, len);
 		}
+		atualizacao.adicionaListaTemporarios(caminhoPastaArquivo, "_temp_" + nome);
+
 		out.flush();
 		out.close();
 		is.close();
@@ -133,12 +142,12 @@ public class App {
 		return newFolder.mkdirs();
 	}
 
-	public static void baixarArquivosNovos(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
+	public static void baixarArquivosNovos(ArquivosAtualizacao arquivosAtualizacao, List<Arquivo> arquivosServidor,
 			List<Arquivo> arquivosLocal) {
-		List<Arquivo> arquivosAdd = md5.adiconarArquivos(arquivosServidor, arquivosLocal);
+		List<Arquivo> arquivosAdd = arquivosAtualizacao.adiconarArquivos(arquivosServidor, arquivosLocal);
 		for (int i = 0; i < arquivosAdd.size(); i++) {
 			try {
-				baixarArquivo(arquivosAdd.get(i).getCaminhoPasta(), arquivosAdd.get(i).getNome());
+				baixarArquivo(arquivosAtualizacao, arquivosAdd.get(i).getCaminhoPasta(), arquivosAdd.get(i).getNome());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -147,25 +156,26 @@ public class App {
 		}
 	}
 
-	public static void excluirArquivosNaoContidosNoServidor(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
-			List<Arquivo> arquivosLocal) {
-		List<Arquivo> arquivosExlusao = md5.excluirArquivos(arquivosServidor, arquivosLocal);
+	public static void excluirArquivosNaoContidosNoServidor(ArquivosAtualizacao arquivosAtualizacao,
+			List<Arquivo> arquivosServidor, List<Arquivo> arquivosLocal) {
+		List<Arquivo> arquivosExlusao = arquivosAtualizacao.excluirArquivos(arquivosServidor, arquivosLocal);
 
 		for (int i = 0; i < arquivosExlusao.size(); i++) {
 			if (!arquivosExlusao.get(i).getCaminhoPasta().equals("MD5.txt")) {
-				deletarArquivo(arquivosExlusao.get(i).getCaminhoPasta());
+				deletarArquivo(arquivosExlusao.get(i).getCaminhoPasta(), arquivosExlusao.get(i).getNome());
 			}
 		}
 	}
 
-	public static void baixarArquivosAlteradosServidor(ArquivosAtualizacao md5, List<Arquivo> arquivosServidor,
-			List<Arquivo> arquivosLocal) {
+	public static void baixarArquivosAlteradosServidor(ArquivosAtualizacao arquivosAtualizacao,
+			List<Arquivo> arquivosServidor, List<Arquivo> arquivosLocal) {
 		try {
-			List<Arquivo> arquivosDownload = md5.comparaListas(arquivosServidor, arquivosLocal);
+			List<Arquivo> arquivosDownload = arquivosAtualizacao.comparaListas(arquivosServidor, arquivosLocal);
 			for (int i = 0; i < arquivosDownload.size(); i++) {
 				System.out.println("Atualizando Arquivos");
 
-				baixarArquivo(arquivosDownload.get(i).getCaminhoPasta(), arquivosDownload.get(i).getNome());
+				baixarArquivo(arquivosAtualizacao, arquivosDownload.get(i).getCaminhoPasta(),
+						arquivosDownload.get(i).getNome());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -173,8 +183,23 @@ public class App {
 		}
 	}
 
-	public static void deletarArquivo(String caminhoPastaArquivo) {
-		File f = new File(CAMINHO + caminhoPastaArquivo);
+	public static void deletarArquivo(String caminhoPastaArquivo, String nome) {
+		File f = new File(CAMINHO + caminhoPastaArquivo + nome);
 		f.delete();
+	}
+
+	public static void renomearArquivosTemp(ArquivosAtualizacao arquivosAtualizacao) {
+		for (int i = 0; i < arquivosAtualizacao.getListaTemporaria().size(); i++) {
+			String nomeAntigo = arquivosAtualizacao.getListaTemporaria().get(i).getNome();
+			String[] nomeNovo = nomeAntigo.split("_temp_");
+
+			File arquivoTemporario = new File(
+					CAMINHO + arquivosAtualizacao.getListaTemporaria().get(i).getCaminhoPasta()
+							+ arquivosAtualizacao.getListaTemporaria().get(i).getNome());
+			File arquivoNovo = new File(
+					CAMINHO + arquivosAtualizacao.getListaTemporaria().get(i).getCaminhoPasta() + nomeNovo[1]);
+
+			arquivoTemporario.renameTo(arquivoNovo);
+		}
 	}
 }

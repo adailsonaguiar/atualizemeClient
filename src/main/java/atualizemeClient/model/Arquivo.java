@@ -60,7 +60,9 @@ public class Arquivo {
 
 	@Override
 	public boolean equals(Object arquivo) {
-		if (this.getCaminhoPasta().equals(((Arquivo) arquivo).getCaminhoPasta())) {
+		String nomeArquivo = this.getCaminhoPasta() + this.getNome();
+		String nomeArquivoCli = ((Arquivo) arquivo).getCaminhoPasta() + ((Arquivo) arquivo).getNome();
+		if (nomeArquivo.equals(nomeArquivoCli)) {
 			return true;
 		}
 		return false;
