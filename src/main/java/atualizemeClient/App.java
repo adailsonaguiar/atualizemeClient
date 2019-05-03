@@ -41,6 +41,7 @@ public class App {
 			excluirArquivosNaoContidosNoServidor(arquivosAtualizacao, arquivosServidor, arquivosLocal);
 
 			baixarArquivosNovos(arquivosAtualizacao, arquivosServidor, arquivosLocal);
+
 			baixarArquivoAtualizacao();
 
 			renomearArquivosTemp(arquivosAtualizacao);
@@ -190,15 +191,17 @@ public class App {
 
 	public static void renomearArquivosTemp(ArquivosAtualizacao arquivosAtualizacao) {
 		for (int i = 0; i < arquivosAtualizacao.getListaTemporaria().size(); i++) {
-			String nomeAntigo = arquivosAtualizacao.getListaTemporaria().get(i).getNome();
-			String[] nomeNovo = nomeAntigo.split("_temp_");
+			String nomeTemporario = arquivosAtualizacao.getListaTemporaria().get(i).getNome();
+			String[] nomeNovo = nomeTemporario.split("_temp_");
 
 			File arquivoTemporario = new File(
 					CAMINHO + arquivosAtualizacao.getListaTemporaria().get(i).getCaminhoPasta()
 							+ arquivosAtualizacao.getListaTemporaria().get(i).getNome());
 			File arquivoNovo = new File(
 					CAMINHO + arquivosAtualizacao.getListaTemporaria().get(i).getCaminhoPasta() + nomeNovo[1]);
-
+			if (arquivoNovo.exists()) {
+				arquivoNovo.delete();
+			}
 			arquivoTemporario.renameTo(arquivoNovo);
 		}
 	}
